@@ -5,6 +5,7 @@ var async = require('async');
 var util = require('../util/util');
 var Validator = require('../resources/Validator');
 var Q = require('q');
+var dm = require('../dm');
 
 module.exports = function(router, resourceName, resourceId) {
   var hook = require('../util/hook')(router.formio);
@@ -97,6 +98,8 @@ module.exports = function(router, resourceName, resourceId) {
           return done('Form not found.');
         }
 
+        form.properties = dm.createPropertiesFromComponents(form.components);
+
         req.currentForm = form;
         req.flattenedComponents = util.flattenComponents(form.components);
         done();
@@ -114,6 +117,8 @@ module.exports = function(router, resourceName, resourceId) {
 
       // If this is a get method, then filter the model query.
       if (isGet) {
+        req.query = dm.coerceQuery(req.currentForm, req.query);
+
         req.countQuery = req.countQuery || this.model;
         req.modelQuery = req.modelQuery || this.model;
 
@@ -143,6 +148,15 @@ module.exports = function(router, resourceName, resourceId) {
 
         // Set the form to the current form.
         req.body.form = req.currentForm._id.toString();
+
+        // Coerce data
+        properties = req.currentForm.properties;
+        const data = req.body.data;
+        _.forEach(data, function (value, key) {
+          if (properties[key]) {
+            data[key] = properties[key].cast(value);
+          }
+        });
 
         // Allow them to alter the body.
         req.body = hook.alter('submissionRequest', req.body);
