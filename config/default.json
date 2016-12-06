@@ -9,8 +9,8 @@
   "mongoSecret": "--- change me now ---",
   "reservedForms": ["submission", "exists", "export", "role", "current", "logout", "import", "form", "access"],
   "jwt": {
-    "secret": "--- change me now ---",
-    "expireTime": 240
+    "secret": "f3t-dbk0fFHS9r2rfwef",
+    "expireTime": 144000
   },
   "email": {
     "type": "sendgrid",
